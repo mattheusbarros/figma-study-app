@@ -1,209 +1,149 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Study AI Ultimate</title>
-<link rel="manifest" href="manifest.json">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+import { useState, useEffect } from "react";
+import { motion } from "framer-motion";
 
-<style>
-*{box-sizing:border-box}
-body{
-  margin:0;
-  font-family:'Inter',sans-serif;
-  background: radial-gradient(circle at top,#020617,#000);
-  color:#e5e7eb;
-}
-.container{max-width:1200px;margin:auto;padding:20px}
-
-h1{text-align:center;font-size:34px;margin-bottom:10px}
-
-.card{
-  background: rgba(255,255,255,0.05);
-  backdrop-filter: blur(20px);
-  border-radius:20px;
-  padding:20px;
-  margin-bottom:20px;
-  box-shadow:0 10px 40px rgba(0,0,0,0.6);
-  transition:0.3s;
-}
-.card:hover{transform:translateY(-5px)}
-
-button{
-  background:linear-gradient(135deg,#3b82f6,#8b5cf6);
-  border:none;
-  color:white;
-  padding:8px 14px;
-  border-radius:12px;
-  cursor:pointer;
-  margin-top:5px;
-}
-
-.progress-bar{height:14px;background:#111;border-radius:20px;margin:20px 0}
-.progress{height:100%;background:linear-gradient(90deg,#22c55e,#4ade80);width:0%;border-radius:20px;transition:0.5s}
-
-.item{display:flex;justify-content:space-between;margin:8px 0}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-iframe{border-radius:15px;width:100%}
-input{width:100%;padding:10px;border-radius:10px;border:none;margin-top:10px}
-
-</style>
-</head>
-<body>
-
-<div class="container">
-<h1>🚀 Study AI Ultimate</h1>
-
-<div class="progress-bar"><div id="progress" class="progress"></div></div>
-<p id="stats" style="text-align:center"></p>
-
-<div id="content"></div>
-
-<div class="grid">
-
-<div class="card">
-<h2>🧠 Quiz Inteligente</h2>
-<p id="quiz">Clique para gerar</p>
-<button onclick="generateQuiz()">Gerar Quiz</button>
-</div>
-
-<div class="card">
-<h2>🔥 XP & Nível</h2>
-<p id="level"></p>
-</div>
-
-</div>
-
-<div class="card">
-<h2>📅 Cronograma Inteligente</h2>
-<ul id="schedule"></ul>
-</div>
-
-<div class="card">
-<h2>🎯 Meta diária</h2>
-<input id="goalInput" placeholder="Ex: estudar 3 tópicos">
-<button onclick="saveGoal()">Salvar</button>
-<p id="goal"></p>
-</div>
-
-<div class="card">
-<h2>🎧 Player YouTube</h2>
-<input id="ytInput" placeholder="Cole link do YouTube">
-<button onclick="loadVideo()">Carregar</button>
-<div style="margin-top:10px">
-<button onclick="quickVideo('jfKfPfyJRdk')">Lo-fi</button>
-<button onclick="quickVideo('5qap5aO4i9A')">Focus</button>
-<button onclick="quickVideo('DWcJFNfaw9c')">Coding</button>
-</div>
-<iframe id="player" height="250" src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>
-</div>
-
-</div>
-
-<audio id="click" src="https://www.soundjay.com/buttons/sounds/button-09.mp3"></audio>
-
-<script>
-const topics=[
-{title:"Fundamentos",items:["UX","UI","Heurísticas","Design Thinking"]},
-{title:"Figma",items:["Frames","Auto Layout","Components","Prototyping"]},
-{title:"Avançado",items:["Design System","Acessibilidade","Microinterações"]},
-{title:"Mercado",items:["Portfólio","Freelance","Entrevistas"]}
+const topicsData = [
+  { title: "Fundamentos", items: ["UX", "UI", "Heurísticas", "Design Thinking"] },
+  { title: "Figma", items: ["Frames", "Auto Layout", "Components", "Prototyping"] },
+  { title: "Avançado", items: ["Design System", "Acessibilidade", "Microinterações"] },
+  { title: "Mercado", items: ["Portfólio", "Freelance", "Entrevistas"] }
 ];
 
-let state=JSON.parse(localStorage.getItem("study"))||{};
-let goal=localStorage.getItem("goal")||"";
+export default function App() {
+  const [state, setState] = useState({});
+  const [quiz, setQuiz] = useState("Clique para gerar");
+  const [goal, setGoal] = useState("");
+  const [video, setVideo] = useState("jfKfPfyJRdk");
 
-function save(){localStorage.setItem("study",JSON.stringify(state));}
-function play(){document.getElementById("click").play();}
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("study") || "{}");
+    const savedGoal = localStorage.getItem("goal") || "";
+    setState(saved);
+    setGoal(savedGoal);
+  }, []);
 
-function render(){
-let total=0,done=0;
-let el=document.getElementById("content");
-el.innerHTML="";
+  useEffect(() => {
+    localStorage.setItem("study", JSON.stringify(state));
+  }, [state]);
 
-topics.forEach((t,i)=>{
-let card=document.createElement("div");
-card.className="card";
-let html=`<h2>${t.title}</h2>`;
+  const toggle = (key) => {
+    setState((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
-t.items.forEach((it,j)=>{
-let key=i+"-"+j;
-total++;
-if(state[key]) done++;
+  let total = 0;
+  let done = 0;
 
-html+=`<div class='item'>
-<span>${it}</span>
-<button onclick="toggle('${key}')">${state[key]?"✔":"Estudar"}</button>
-</div>`;
-});
+  topicsData.forEach((t, i) => {
+    t.items.forEach((_, j) => {
+      total++;
+      if (state[`${i}-${j}`]) done++;
+    });
+  });
 
-card.innerHTML=html;
-el.appendChild(card);
-});
+  const percent = total ? (done / total) * 100 : 0;
+  const xp = done * 15;
+  const level = Math.floor(xp / 60);
 
-let percent=(done/total)*100;
-document.getElementById("progress").style.width=percent+"%";
-document.getElementById("stats").innerText=`${done}/${total} (${Math.round(percent)}%)`;
+  const generateQuiz = () => {
+    let pool = [];
+    topicsData.forEach((t, i) => {
+      t.items.forEach((it, j) => {
+        if (!state[`${i}-${j}`]) pool.push(it);
+      });
+    });
 
-let xp=done*15;
-let lvl=Math.floor(xp/60);
-document.getElementById("level").innerText=`XP: ${xp} | Nível: ${lvl}`;
+    const item = pool.length ? pool[Math.floor(Math.random() * pool.length)] : "UX";
+    const questions = [
+      `Explique ${item}`,
+      `Como aplicar ${item}?`,
+      `Por que ${item} importa?`
+    ];
+
+    setQuiz(questions[Math.floor(Math.random() * questions.length)]);
+  };
+
+  const loadVideo = (url) => {
+    const id = url.split("v=")[1]?.split("&")[0];
+    if (id) setVideo(id);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-black to-slate-900 text-white p-6">
+      <h1 className="text-3xl font-bold text-center mb-6">🚀 Study AI Pro</h1>
+
+      <div className="w-full bg-gray-800 rounded-full h-4 mb-4">
+        <div
+          className="bg-green-400 h-4 rounded-full transition-all"
+          style={{ width: percent + "%" }}
+        />
+      </div>
+
+      <p className="text-center mb-6">
+        {done}/{total} ({Math.round(percent)}%) | XP: {xp} | Nível: {level}
+      </p>
+
+      <div className="grid md:grid-cols-2 gap-4">
+        {topicsData.map((t, i) => (
+          <motion.div key={i} whileHover={{ scale: 1.03 }} className="bg-white/5 p-4 rounded-2xl">
+            <h2 className="text-xl mb-2">{t.title}</h2>
+            {t.items.map((it, j) => {
+              const key = `${i}-${j}`;
+              return (
+                <div key={key} className="flex justify-between mb-2">
+                  <span>{it}</span>
+                  <button
+                    onClick={() => toggle(key)}
+                    className="bg-blue-500 px-2 rounded"
+                  >
+                    {state[key] ? "✔" : "Estudar"}
+                  </button>
+                </div>
+              );
+            })}
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="mt-6 bg-white/5 p-4 rounded-2xl">
+        <h2 className="mb-2">🧠 Quiz Inteligente</h2>
+        <p>{quiz}</p>
+        <button onClick={generateQuiz} className="mt-2 bg-purple-500 px-3 py-1 rounded">
+          Gerar
+        </button>
+      </div>
+
+      <div className="mt-6 bg-white/5 p-4 rounded-2xl">
+        <h2>🎯 Meta</h2>
+        <input
+          value={goal}
+          onChange={(e) => {
+            setGoal(e.target.value);
+            localStorage.setItem("goal", e.target.value);
+          }}
+          className="w-full p-2 rounded mt-2 text-black"
+        />
+        <p className="mt-2">Meta: {goal}</p>
+      </div>
+
+      <div className="mt-6 bg-white/5 p-4 rounded-2xl">
+        <h2>🎧 Player</h2>
+        <input
+          placeholder="Cole link do YouTube"
+          onBlur={(e) => loadVideo(e.target.value)}
+          className="w-full p-2 rounded mt-2 text-black"
+        />
+
+        <div className="flex gap-2 mt-2">
+          <button onClick={() => setVideo("jfKfPfyJRdk")}>Lo-fi</button>
+          <button onClick={() => setVideo("5qap5aO4i9A")}>Focus</button>
+        </div>
+
+        <iframe
+          className="w-full mt-4 rounded-xl"
+          height="250"
+          src={`https://www.youtube.com/embed/${video}`}
+          allowFullScreen
+        />
+      </div>
+    </div>
+  );
 }
-
-function toggle(k){state[k]=!state[k];play();save();render();}
-
-function generateQuiz(){
-let pool=[];
-topics.forEach((t,i)=>{
-t.items.forEach((it,j)=>{
-let key=i+"-"+j;
-if(!state[key]) pool.push(it);
-});
-});
-
-let item=pool.length?pool[Math.floor(Math.random()*pool.length)]:"UX";
-let q=[
-`Explique ${item}`,
-`Como aplicar ${item}?`,
-`Por que ${item} importa?`
-];
-
-document.getElementById("quiz").innerText=q[Math.floor(Math.random()*q.length)];
-}
-
-function schedule(){
-let el=document.getElementById("schedule");
-el.innerHTML="";
-topics.forEach((t,i)=>{
-let li=document.createElement("li");
-li.innerText=`Dia ${i+1}: ${t.title}`;
-el.appendChild(li);
-});
-}
-
-function saveGoal(){
-goal=document.getElementById("goalInput").value;
-localStorage.setItem("goal",goal);
-document.getElementById("goal").innerText="Meta: "+goal;
-}
-
-function loadVideo(){
-let url=document.getElementById("ytInput").value;
-let id=url.split("v=")[1]?.split("&")[0];
-if(id){document.getElementById("player").src=`https://www.youtube.com/embed/${id}`}
-}
-
-function quickVideo(id){
-document.getElementById("player").src=`https://www.youtube.com/embed/${id}`;
-}
-
-render();
-schedule();
-document.getElementById("goal").innerText="Meta: "+goal;
-
-if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}
-</script>
-
-</body>
-</html>
