@@ -1,15 +1,10 @@
+<!-- manifest.json -->
 {
-  "name": "Figma Study AI",
-  "short_name": "StudyAI",
-  "start_url": ".",
-  "display": "standalone",
-  "background_color": "#020617",
-  "theme_color": "#020617",
-  "icons": [
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/5968/5968705.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    }
-  ]
+"name":"Ultimate Study Roadmap",
+"short_name":"StudyPro",
+"start_url":".",
+"display":"standalone",
+"background_color":"#000",
+"theme_color":"#000",
+"icons":[{"src":"https://cdn-icons-png.flaticon.com/512/5968/5968705.png","sizes":"192x192","type":"image/png"}]
 }
