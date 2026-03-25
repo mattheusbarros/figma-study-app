@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figma Study AI</title>
+
+<link rel="manifest" href="manifest.json">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:'Inter',sans-serif;
+  background: radial-gradient(circle at top,#0b1220,#020617);
+  color:#e5e7eb;
+}
+.container{max-width:1000px;margin:auto;padding:20px}
+h1{text-align:center}
+
+.card{
+  background: rgba(17,24,39,0.7);
+  backdrop-filter: blur(12px);
+  border-radius:20px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.4);
+  transition:0.3s;
+}
+.card:hover{transform:scale(1.02)}
+
+button{
+  background:linear-gradient(135deg,#3b82f6,#6366f1);
+  border:none;
+  color:white;
+  padding:8px 12px;
+  border-radius:10px;
+  cursor:pointer;
+}
+
+.progress-bar{
+  height:12px;
+  background:#1f2937;
+  border-radius:20px;
+  overflow:hidden;
+  margin:20px 0;
+}
+.progress{
+  height:100%;
+  background:linear-gradient(90deg,#22c55e,#4ade80);
+  width:0%;
+  transition:0.4s;
+}
+
+.item{
+  display:flex;
+  justify-content:space-between;
+  margin:6px 0;
+}
+iframe{
+  border:none;
+  border-radius:15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🚀 Figma Study AI</h1>
+
+<div class="progress-bar">
+  <div id="progress" class="progress"></div>
+</div>
+<p id="stats" style="text-align:center"></p>
+
+<div id="content"></div>
+
+<div class="card">
+<h2>🧠 Quiz Inteligente</h2>
+<p id="quiz">Clique para gerar pergunta</p>
+<button onclick="generateQuiz()">Gerar Pergunta</button>
+</div>
+
+<div class="card">
+<h2>🎧 Música para estudar</h2>
+<iframe 
+  width="100%" 
+  height="200" 
+  src="https://www.youtube.com/embed/jfKfPfyJRdk"
+  allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+  allowfullscreen>
+</iframe>
+</div>
+
+</div>
+
+<audio id="click" src="https://www.soundjay.com/buttons/sounds/button-09.mp3"></audio>
+
+<script>
+const topics = [
+  {title:"Introdução", items:["Canvas","Frames","Layers"]},
+  {title:"Ferramentas", items:["Shapes","Texto","Alinhamento"]},
+  {title:"Componentes", items:["Auto Layout","Variants","Styles"]},
+  {title:"Prototipagem", items:["Interações","Transições"]}
+];
+
+let state = JSON.parse(localStorage.getItem("study")) || {};
+
+function save(){
+  localStorage.setItem("study", JSON.stringify(state));
+}
+
+function playSound(){
+  document.getElementById("click").play();
+}
+
+function render(){
+  let total = 0, done = 0;
+  const el = document.getElementById("content");
+  el.innerHTML = "";
+
+  topics.forEach((t,i)=>{
+    let card = document.createElement("div");
+    card.className = "card";
+
+    let html = `<h2>${t.title}</h2>`;
+
+    t.items.forEach((item,j)=>{
+      let key = i+"-"+j;
+      total++;
+
+      if(state[key]) done++;
+
+      html += `
+      <div class="item">
+        <span>${item}</span>
+        <button onclick="toggle('${key}')">
+          ${state[key] ? "✔" : "Marcar"}
+        </button>
+      </div>`;
+    });
+
+    card.innerHTML = html;
+    el.appendChild(card);
+  });
+
+  let percent = total ? (done/total)*100 : 0;
+
+  document.getElementById("progress").style.width = percent+"%";
+  document.getElementById("stats").innerText =
+    `${done}/${total} concluídos (${Math.round(percent)}%)`;
+}
+
+function toggle(key){
+  state[key] = !state[key];
+  playSound();
+  save();
+  render();
+}
+
+function generateQuiz(){
+  let incomplete = [];
+
+  topics.forEach((t,i)=>{
+    t.items.forEach((item,j)=>{
+      let key = i+"-"+j;
+      if(!state[key]) incomplete.push(item);
+    });
+  });
+
+  let pool = incomplete.length ? incomplete : ["Auto Layout","Componentes"];
+
+  let item = pool[Math.floor(Math.random()*pool.length)];
+
+  let questions = [
+    `Explique o que é ${item}`,
+    `Como usar ${item} na prática?`,
+    `Qual problema ${item} resolve?`
+  ];
+
+  document.getElementById("quiz").innerText =
+    questions[Math.floor(Math.random()*questions.length)];
+}
+
+render();
+
+//if('serviceWorker' in navigator){
+  //navigator.serviceWorker.register('sw.js');
+//}
+</script>
+
+</body>
+</html>
