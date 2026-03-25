@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultimate Study Roadmap</title>
+<title>Study AI Ultimate</title>
 <link rel="manifest" href="manifest.json">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 
@@ -16,6 +16,7 @@ body{
   color:#e5e7eb;
 }
 .container{max-width:1200px;margin:auto;padding:20px}
+
 h1{text-align:center;font-size:34px;margin-bottom:10px}
 
 .card{
@@ -25,7 +26,9 @@ h1{text-align:center;font-size:34px;margin-bottom:10px}
   padding:20px;
   margin-bottom:20px;
   box-shadow:0 10px 40px rgba(0,0,0,0.6);
+  transition:0.3s;
 }
+.card:hover{transform:translateY(-5px)}
 
 button{
   background:linear-gradient(135deg,#3b82f6,#8b5cf6);
@@ -34,23 +37,23 @@ button{
   padding:8px 14px;
   border-radius:12px;
   cursor:pointer;
+  margin-top:5px;
 }
 
 .progress-bar{height:14px;background:#111;border-radius:20px;margin:20px 0}
 .progress{height:100%;background:linear-gradient(90deg,#22c55e,#4ade80);width:0%;border-radius:20px;transition:0.5s}
 
 .item{display:flex;justify-content:space-between;margin:8px 0}
-
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
-
 iframe{border-radius:15px;width:100%}
+input{width:100%;padding:10px;border-radius:10px;border:none;margin-top:10px}
 
 </style>
 </head>
 <body>
 
 <div class="container">
-<h1>🚀 Ultimate Study Roadmap</h1>
+<h1>🚀 Study AI Ultimate</h1>
 
 <div class="progress-bar"><div id="progress" class="progress"></div></div>
 <p id="stats" style="text-align:center"></p>
@@ -58,27 +61,41 @@ iframe{border-radius:15px;width:100%}
 <div id="content"></div>
 
 <div class="grid">
+
 <div class="card">
 <h2>🧠 Quiz Inteligente</h2>
 <p id="quiz">Clique para gerar</p>
-<button onclick="quiz()">Gerar</button>
+<button onclick="generateQuiz()">Gerar Quiz</button>
 </div>
 
 <div class="card">
-<h2>🔥 Nível & XP</h2>
+<h2>🔥 XP & Nível</h2>
 <p id="level"></p>
 </div>
+
 </div>
 
 <div class="card">
-<h2>📅 Cronograma automático</h2>
+<h2>📅 Cronograma Inteligente</h2>
 <ul id="schedule"></ul>
 </div>
 
 <div class="card">
+<h2>🎯 Meta diária</h2>
+<input id="goalInput" placeholder="Ex: estudar 3 tópicos">
+<button onclick="saveGoal()">Salvar</button>
+<p id="goal"></p>
+</div>
+
+<div class="card">
 <h2>🎧 Player YouTube</h2>
-<input id="yt" placeholder="Cole link do YouTube">
-<button onclick="loadYT()">Carregar</button>
+<input id="ytInput" placeholder="Cole link do YouTube">
+<button onclick="loadVideo()">Carregar</button>
+<div style="margin-top:10px">
+<button onclick="quickVideo('jfKfPfyJRdk')">Lo-fi</button>
+<button onclick="quickVideo('5qap5aO4i9A')">Focus</button>
+<button onclick="quickVideo('DWcJFNfaw9c')">Coding</button>
+</div>
 <iframe id="player" height="250" src="https://www.youtube.com/embed/jfKfPfyJRdk"></iframe>
 </div>
 
@@ -90,18 +107,19 @@ iframe{border-radius:15px;width:100%}
 const topics=[
 {title:"Fundamentos",items:["UX","UI","Heurísticas","Design Thinking"]},
 {title:"Figma",items:["Frames","Auto Layout","Components","Prototyping"]},
-{title:"Design Avançado",items:["Design System","Acessibilidade","Microinterações"]},
+{title:"Avançado",items:["Design System","Acessibilidade","Microinterações"]},
 {title:"Mercado",items:["Portfólio","Freelance","Entrevistas"]}
 ];
 
 let state=JSON.parse(localStorage.getItem("study"))||{};
+let goal=localStorage.getItem("goal")||"";
 
 function save(){localStorage.setItem("study",JSON.stringify(state));}
-function sound(){document.getElementById("click").play();}
+function play(){document.getElementById("click").play();}
 
 function render(){
 let total=0,done=0;
-const el=document.getElementById("content");
+let el=document.getElementById("content");
 el.innerHTML="";
 
 topics.forEach((t,i)=>{
@@ -128,14 +146,14 @@ let percent=(done/total)*100;
 document.getElementById("progress").style.width=percent+"%";
 document.getElementById("stats").innerText=`${done}/${total} (${Math.round(percent)}%)`;
 
-let xp=done*10;
-let lvl=Math.floor(xp/50);
+let xp=done*15;
+let lvl=Math.floor(xp/60);
 document.getElementById("level").innerText=`XP: ${xp} | Nível: ${lvl}`;
 }
 
-function toggle(k){state[k]=!state[k];sound();save();render();}
+function toggle(k){state[k]=!state[k];play();save();render();}
 
-function quiz(){
+function generateQuiz(){
 let pool=[];
 topics.forEach((t,i)=>{
 t.items.forEach((it,j)=>{
@@ -164,14 +182,25 @@ el.appendChild(li);
 });
 }
 
-function loadYT(){
-let url=document.getElementById("yt").value;
+function saveGoal(){
+goal=document.getElementById("goalInput").value;
+localStorage.setItem("goal",goal);
+document.getElementById("goal").innerText="Meta: "+goal;
+}
+
+function loadVideo(){
+let url=document.getElementById("ytInput").value;
 let id=url.split("v=")[1]?.split("&")[0];
 if(id){document.getElementById("player").src=`https://www.youtube.com/embed/${id}`}
 }
 
+function quickVideo(id){
+document.getElementById("player").src=`https://www.youtube.com/embed/${id}`;
+}
+
 render();
 schedule();
+document.getElementById("goal").innerText="Meta: "+goal;
 
 if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js');}
 </script>
